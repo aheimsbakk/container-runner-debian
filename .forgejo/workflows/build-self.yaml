@@ -9,7 +9,7 @@ jobs:
     env:
       STORAGE_DRIVER: vfs
     #   BUILDAH_FORMAT: docker
-    #   BUILDAH_ISOLATION: chroot
+      BUILDAH_ISOLATION: chroot
        
     steps:
       - run: echo ${{ env.GITHUB_ACTOR }}
@@ -21,7 +21,7 @@ jobs:
       - name: Build container
         uses: https://vel.heimsbakk.no/actions/buildah-build@v2
         with:
-          image: vel.heimsbakk.no/containers/test
+          image: test
           tags: latest
           containerfiles: |
             ./Containerfile
