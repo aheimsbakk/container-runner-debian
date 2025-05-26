@@ -6,13 +6,13 @@ jobs:
     container:
       image: vel.heimsbakk.no/containers/debian-bookworm:latest
 
-    # env:
-    #   STORAGE_DRIVER: vfs
+    env:
+      STORAGE_DRIVER: vfs
     #   BUILDAH_FORMAT: docker
     #   BUILDAH_ISOLATION: chroot
        
     steps:
-      - run: echo $BUILDAH_ISOLATION
+      - run: echo ${{ env.GITHUB_ACTOR }}
       - run: ls -la
 
       - name: Check out repository
