@@ -1,13 +1,20 @@
+---
 on: [push]
 jobs:
-  test1:
+  build-container:
     runs-on: docker
     container:
       image: vel.heimsbakk.no/containers/debian-bookworm:latest
+       
     steps:
       - name: Check out repository
         uses: https://vel.heimsbakk.no/actions/checkout@v4
 
       - name: Build container
         uses: https://vel.heimsbakk.no/actions/buildah-build@v2
+        env:
+          STORAGE_DRIVER: vfs
+          BUILDAH_FORMAT: docker
+          BUILDAH_ISOLATION: chroot
+
       - run: ls -la
