@@ -33,7 +33,7 @@ jobs:
         id: build-container
         uses: https://vel.heimsbakk.no/actions/buildah-build@v2
         with:
-          image: 
+          image: ${{ env.REPO_NAME }}
           tags: latest ${{ github.sha }}
           containerfiles: |
             ./Containerfile
