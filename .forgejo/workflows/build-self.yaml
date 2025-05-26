@@ -14,9 +14,9 @@ jobs:
     steps:
       - name: Get server name
         run: | 
-          FORGEJO_SERVER=${{ env.GITHUB_SERVER_URL }}
-          FORGEJO_SERVER=$(echo ${FORGEJO_SERVER} | sed "s#https://##g")
-          echo FORGEJO_SERVER=${FORGEJO_SERVER} >> $GITHUB_ENV
+          REGISTRY_PATH=${{ env.GITHUB_SERVER_URL }}
+          REGISTRY_PATH=$(echo ${REGISTRY_PATH} | sed "s#https://##g")/containers
+          echo REGISTRY_PATH=${REGISTRY_PATH} >> $GITHUB_ENV
 
       - name: Check out repository
         uses: https://vel.heimsbakk.no/actions/checkout@v4
@@ -35,9 +35,9 @@ jobs:
         with:
           image: ${{ steps.build-container.outputs.image }}
           tags: ${{ steps.build-container.outputs.tags }}
-          registry: ${{ env.FORGEJO_SERVER }}/containers
+          registry: ${{ env.REGISTRY_PATH }}
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}          
+          password: ${{ secrets.REGISTRY_SECRET }}          
 
       - name: Print image url
         run: echo "Image pushed to ${{ steps.push-to-quay.outputs.registry-paths }}"
