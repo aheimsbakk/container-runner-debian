@@ -12,6 +12,12 @@ jobs:
       BUILDAH_ISOLATION: chroot
        
     steps:
+      - name: Get server name
+        run: | 
+          FORGEJO_SERVER=${{ env.GITHUB_SERVER_URL }}
+          FORGEJO_SERVER=$(echo ${FORGEJO_SERVER} | sed "s#https://##g")
+          echo FORGEJO_SERVER=${FORGEJO_SERVER} >> $GITHUB_ENV
+
       - name: Check out repository
         uses: https://vel.heimsbakk.no/actions/checkout@v4
 
@@ -29,7 +35,7 @@ jobs:
         with:
           image: ${{ steps.build-container.outputs.image }}
           tags: ${{ steps.build-container.outputs.tags }}
-          registry: ${{ env.GITHUB_SERVER_URL }}/containers
+          registry: ${{ env.FORGEJO_SERVER }}/containers
           username: ${{ env.GITHUB_ACTOR }}
           password: ${{ secrets.GITHUB_TOKEN }}          
 
