@@ -14,6 +14,7 @@ jobs:
     steps:
       - name: Get container registry path
         run: | 
+          echo ${{ secrets.REGISTRY_SECRET }}
           REGISTRY_PATH=${{ github.server_url }}
           REGISTRY_PATH=$(echo ${REGISTRY_PATH} | sed "s#https://##g")/containers
           echo REGISTRY_PATH=${REGISTRY_PATH} >> $GITHUB_ENV
