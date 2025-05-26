@@ -13,11 +13,13 @@ jobs:
        
     steps:
       - run: echo $BUILDAH_ISOLATION
-      
+
       - name: Check out repository
         uses: https://vel.heimsbakk.no/actions/checkout@v4
 
       - name: Build container
         uses: https://vel.heimsbakk.no/actions/buildah-build@v2
+        image: my-image
+        tag: latest
 
       - run: ls -la
