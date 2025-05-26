@@ -1,0 +1,13 @@
+on: [push]
+jobs:
+  test1:
+    runs-on: docker
+    container:
+      image: vel.heimsbakk.no/containers/debian-bookworm:latest
+    steps:
+      - name: Check out repository
+        uses: https://vel.heimsbakk.no/actions/checkout@v4
+
+      - name: Build container
+        uses: https://vel.heimsbakk.no/actions/buildah-build@v2
+      - run: ls -la
