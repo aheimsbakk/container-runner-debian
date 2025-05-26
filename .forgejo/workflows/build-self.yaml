@@ -12,13 +12,11 @@ jobs:
       BUILDAH_ISOLATION: chroot
        
     steps:
-      - run: echo ${{ env.GITHUB_ACTOR }}
-      - run: ls -la
-
       - name: Check out repository
         uses: https://vel.heimsbakk.no/actions/checkout@v4
 
       - name: Build container
+        id: build-container
         uses: https://vel.heimsbakk.no/actions/buildah-build@v2
         with:
           image: test
@@ -29,8 +27,8 @@ jobs:
       - name: Push Container
         uses: https://vel.heimsbakk.no/actions/push-to-registry@v2
         with:
-          image: ${{ steps.build-image.outputs.image }}
-          tags: ${{ steps.build-image.outputs.tags }}
+          image: ${{ steps.build-container.outputs.image }}
+          tags: ${{ steps.build-container.outputs.tags }}
           registry: ${{ env.GITHUB_SERVER_URL }}/containers
           username: ${{ env.GITHUB_ACTOR }}
           password: ${{ secrets.GITHUB_TOKEN }}          
