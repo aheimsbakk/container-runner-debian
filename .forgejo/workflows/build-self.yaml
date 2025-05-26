@@ -20,9 +20,10 @@ jobs:
 
       - name: Build container
         uses: https://vel.heimsbakk.no/actions/buildah-build@v2
-        image: my-image
-        tags: latest
-        containerfiles: |
-          ./Containerfile
-          
+        with:
+          image: my-image
+          tags: latest
+          containerfiles: |
+            ./Containerfile
+
       - run: ls -la
