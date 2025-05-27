@@ -1,5 +1,9 @@
 ---
-on: [push]
+on:
+  push:
+  schedule:
+  - cron: '0 23 * * *'
+
 jobs:
   build-container:
     runs-on: docker
@@ -26,11 +30,11 @@ jobs:
           echo REPO_NAME=${REPO_NAME} >> $GITHUB_ENV
 
       - name: Check out repository
-        uses: https://vel.heimsbakk.no/actions/checkout@v4
+        uses: ${{ github.server_url }}/actions/checkout@v4
 
       - name: Build container
         id: build-container
-        uses: https://vel.heimsbakk.no/actions/buildah-build@v2
+        uses: ${{ github.server_url }}/actions/buildah-build@v2
         with:
           image: ${{ env.REPO_NAME }}
           tags: latest ${{ github.sha }}
@@ -40,13 +44,13 @@ jobs:
       - name: Push Container when on main branch
         id: push-container
         if: github.ref == 'refs/heads/main'
-        uses: https://vel.heimsbakk.no/actions/push-to-registry@v2
+        uses: ${{ github.server_url }}/actions/push-to-registry@v2
         with:
           image: ${{ steps.build-container.outputs.image }}
           tags: ${{ steps.build-container.outputs.tags }}
           registry: ${{ env.REGISTRY_PATH }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.REGISTRY_SECRET }}
+          username: ${{ secrets.REGISTRY_USER }}
+          password: ${{ secrets.REGISTRY_PASS }}
 
       - name: Print container url when on main branch
         if: github.ref == 'refs/heads/main'
