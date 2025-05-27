@@ -9,7 +9,7 @@ jobs:
   build-container:
     runs-on: docker
     container:
-      image: ${{ github.server_url }}/containers/runner-latest:latest
+      image: ${{ github.server_url }}/containers/runner-debian:latest
     strategy:
       matrix:
         container:
