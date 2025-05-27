@@ -9,7 +9,12 @@ jobs:
   build-container:
     runs-on: docker
     container:
-      image: vel.heimsbakk.no/containers/debian-bookworm:latest
+      image: ${{ github.server_url }}/containers/runner-latest:latest
+    strategy:
+      matrix:
+        container:
+          - release: bookworm
+            tags: latest bookworm ${{ github.sha }}
 
     env:
       STORAGE_DRIVER: vfs
@@ -38,7 +43,7 @@ jobs:
         uses: ${{ github.server_url }}/actions/buildah-build@v2
         with:
           image: ${{ env.REPO_NAME }}
-          tags: latest ${{ github.sha }}
+          tags: ${ matrix.container.tags }
           containerfiles: |
             ./Containerfile
 
