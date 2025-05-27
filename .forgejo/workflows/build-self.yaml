@@ -15,6 +15,8 @@ jobs:
         container:
           - release: bookworm
             tags: latest bookworm ${{ github.sha }}
+          - release: trixie
+            tags: trixie
 
     env:
       STORAGE_DRIVER: vfs
@@ -46,6 +48,8 @@ jobs:
           tags: ${{ matrix.container.tags }}
           containerfiles: |
             ./Containerfile
+          build-args: |
+            DEBIAN_RELEASE=${{ matrix.container.release }}
 
       - name: Push Container when on main branch
         id: push-container
