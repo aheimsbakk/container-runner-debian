@@ -1,4 +1,4 @@
-# Debian ForgeJo Action Image
+# Debian ForgeJo Actions Image
 
 Standard image for ForgeJo and Github Actions.
 
