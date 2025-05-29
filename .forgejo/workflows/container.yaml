@@ -25,7 +25,7 @@ jobs:
       STORAGE_DRIVER: vfs
       BUILDAH_FORMAT: docker
       BUILDAH_ISOLATION: chroot
-       
+
     steps:
       - name: Get container registry path
         run: | 
@@ -56,7 +56,7 @@ jobs:
 
       - name: Push Container when on main branch
         id: push-container
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || github.event_name == 'schedule'
         uses: ${{ github.server_url }}/actions/push-to-registry@v2
         with:
           image: ${{ steps.build-container.outputs.image }}
@@ -66,5 +66,5 @@ jobs:
           password: ${{ secrets.REGISTRY_PASS }}
 
       - name: Print container url when on main branch
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || github.event_name == 'schedule'
         run: echo "Image pushed to ${{ steps.push-container.outputs.registry-paths }}"
