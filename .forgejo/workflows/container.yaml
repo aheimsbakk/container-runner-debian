@@ -11,8 +11,8 @@ on:
 jobs:
   build-container:
     runs-on: ubuntu-latest
-    # container:
-    #   image: vel.heimsbakk.no/containers/runner-debian:latest
+    container:
+      image: vel.heimsbakk.no/containers/runner-debian:latest
     strategy:
       matrix:
         container:
