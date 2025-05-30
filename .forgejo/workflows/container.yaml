@@ -30,24 +30,25 @@ jobs:
       - name: Get container registry path
         run: | 
           REGISTRY_PATH=${{ github.server_url }}
-          REGISTRY_PATH=$(echo ${REGISTRY_PATH} | sed "s#https://##g")/containers
+          REGISTRY_PATH=$(echo ${REGISTRY_PATH} | sed "s#https://##g")/${{ github.repository_owner }}
           echo REGISTRY_PATH=${REGISTRY_PATH} >> $GITHUB_ENV
 
       - name: Get repository name
         run: | 
-          REPO_NAME=${{ github.repository }}
+          IMAGE_NAME=${{ github.repository }}
           REPO_OWNER=${{ github.repository_owner }}
-          REPO_NAME=$(echo ${REPO_NAME} | sed "s#${REPO_OWNER}/##g")
-          echo REPO_NAME=${REPO_NAME} >> $GITHUB_ENV
+          IMAGE_NAME=$(echo ${IMAGE_NAME} | sed "s#${REPO_OWNER}/##g")
+          IMAGE_NAME=$(echo ${IMAGE_NAME} | sed "s#container-##g")
+          echo IMAGE_NAME=${IMAGE_NAME} >> $GITHUB_ENV
 
       - name: Check out repository
         uses: ${{ github.server_url }}/actions/checkout@v4
 
       - name: Build container
         id: build-container
-        uses: ${{ github.server_url }}/actions/buildah-build@v2
+        uses: ${{ github.server_url }}/redhat-actions/buildah-build@v2
         with:
-          image: ${{ env.REPO_NAME }}
+          image: ${{ env.IMAGE_NAME }}
           tags: ${{ matrix.container.tags }}
           containerfiles: |
             ./Containerfile
@@ -57,7 +58,7 @@ jobs:
       - name: Push Container when on main branch
         id: push-container
         if: github.ref == 'refs/heads/main' || github.event_name == 'schedule'
-        uses: ${{ github.server_url }}/actions/push-to-registry@v2
+        uses: ${{ github.server_url }}/redhat-actions/push-to-registry@v2
         with:
           image: ${{ steps.build-container.outputs.image }}
           tags: ${{ steps.build-container.outputs.tags }}
