@@ -10,7 +10,7 @@ on:
 
 jobs:
   build-container:
-    runs-on: docker
+    runs-on: podman:host
     container:
       image: vel.heimsbakk.no/containers/runner-debian:latest
     strategy:
