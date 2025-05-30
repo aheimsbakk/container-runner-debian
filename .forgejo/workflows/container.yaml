@@ -4,6 +4,8 @@ on:
     paths:
       - '**/*.yaml'
       - '**/*.yml'
+      - 'Containerfile'
+      - 'Dockerfile'
   workflow_dispatch:
   schedule:
   - cron: '0 23 * * *'
