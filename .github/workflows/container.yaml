@@ -42,11 +42,11 @@ jobs:
           echo IMAGE_NAME=${IMAGE_NAME} >> $GITHUB_ENV
 
       - name: Check out repository
-        uses: ${{ env.GITHUB_SERVER_URL }}/actions/checkout@v4
+        uses: actions/checkout@v4
 
       - name: Build container
         id: build-container
-        uses: ${{ env.GITHUB_SERVER_URL }}/redhat-actions/buildah-build@v2
+        uses: redhat-actions/buildah-build@v2
         with:
           image: ${{ env.IMAGE_NAME }}
           tags: ${{ matrix.container.tags }}
@@ -58,7 +58,7 @@ jobs:
       - name: Push Container when on main branch
         id: push-container
         if: github.ref == 'refs/heads/main' || github.event_name == 'schedule'
-        uses: ${{ env.GITHUB_SERVER_URL }}/redhat-actions/push-to-registry@v2
+        uses: redhat-actions/push-to-registry@v2
         with:
           image: ${{ steps.build-container.outputs.image }}
           tags: ${{ steps.build-container.outputs.tags }}
