@@ -7,5 +7,6 @@ RUN apt-get update; \
       buildah \
       node-typescript \
       podman \
+      sudo \
       ; \
     apt-get clean
