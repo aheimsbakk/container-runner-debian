@@ -10,8 +10,7 @@ on:
 
 jobs:
   build-container:
-    runs-on:
-      - ubuntu-latest
+    runs-on: docker
     container:
       image: vel.heimsbakk.no/containers/runner-debian:latest
     strategy:
