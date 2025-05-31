@@ -7,6 +7,7 @@ RUN apt-get update; \
       buildah \
       node-typescript \
       podman \
+      qemu-user-static \
       sudo \
       ; \
     apt-get clean
