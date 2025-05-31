@@ -18,10 +18,14 @@ jobs:
     strategy:
       matrix:
         container:
-          - release: bookworm
+          - extra_args: --build-arg=DEBIAN_RELEASE="bookworm"
             tags: latest bookworm ${{ github.sha }}
-          - release: trixie
-            tags: trixie
+            platform: linux/amd64
+            containerfile: Containerfile
+          - extra_args: --build-arg=DEBIAN_RELEASE="trixie"
+            tags: bookworm latest
+            platform: linux/amd64
+            containerfile: Containerfile
 
     env:
       STORAGE_DRIVER: vfs
@@ -46,28 +50,27 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Build container
-        id: build-container
-        uses: redhat-actions/buildah-build@v2
-        with:
-          image: ${{ env.IMAGE_NAME }}
-          tags: ${{ matrix.container.tags }}
-          containerfiles: |
-            ./Containerfile
-          build-args: |
-            DEBIAN_RELEASE=${{ matrix.container.release }}
+      - name: Buildah build for all platforms
+        run: |
+          buildah build ${{ matrix.container.extra_args }} \
+            --platform ${{ matrix.container.platform }} \
+            --manifest image \
+            -f ${{ matrix.container.containerfile }}
 
-      - name: Push Container when on main branch
-        id: push-container
+      - name: Registry login
         if: github.ref == 'refs/heads/main' || github.event_name == 'schedule'
-        uses: redhat-actions/push-to-registry@v2
-        with:
-          image: ${{ steps.build-container.outputs.image }}
-          tags: ${{ steps.build-container.outputs.tags }}
-          registry: ${{ env.REGISTRY_PATH }}
-          username: ${{ secrets.REGISTRY_USER }}
-          password: ${{ secrets.REGISTRY_PASS }}
+        run: |
+          echo "${{ secrets.REGISTRY_PASS }}" | \
+            buildah login \
+              -u "${{ secrets.REGISTRY_USER }}" \
+              --password-stdin ${{ env.REGISTRY_PATH }}
 
-      - name: Print container url when on main branch
+      - name: Registry push
         if: github.ref == 'refs/heads/main' || github.event_name == 'schedule'
-        run: echo "Image pushed to ${{ steps.push-container.outputs.registry-paths }}"
+        run: |
+          for tag in ${{ matrix.container.tags }}; do
+            buildah manifest push --all \
+              localhost/image \
+              docker://${{ env.REGISTRY_PATH }}/${{ env.IMAGE_NAME }}:${tag}
+            echo Pushed to ${{ env.REGISTRY_PATH }}/${{ env.IMAGE_NAME }}:${tag}
+          done
