@@ -2,13 +2,13 @@
 on:
   push:
     paths:
-      - '**/*.yaml'
-      - '**/*.yml'
+      - '.forgejo/**/*.yaml'
+      - '.forgejo/**/*.yml'
       - 'Containerfile'
       - 'Dockerfile'
   workflow_dispatch:
   schedule:
-  - cron: '0 23 * * *'
+  - cron: '0 23 * * 2'
 
 jobs:
   build-container:
@@ -34,7 +34,7 @@ jobs:
 
     steps:
       - name: Get container registry path
-        run: | 
+        run: |
           REGISTRY_PATH=${{ env.GITHUB_SERVER_URL }}
           REGISTRY_PATH=$(echo ${REGISTRY_PATH} | sed "s#https://##g")/${{ github.repository_owner }}
           echo REGISTRY_PATH=${REGISTRY_PATH} >> $GITHUB_ENV
@@ -70,7 +70,33 @@ jobs:
         run: |
           for tag in ${{ matrix.container.tags }}; do
             buildah manifest push --all \
+              --compression-format zstd --compression-level 9 \
               localhost/image \
               docker://${{ env.REGISTRY_PATH }}/${{ env.IMAGE_NAME }}:${tag}
             echo Pushed to ${{ env.REGISTRY_PATH }}/${{ env.IMAGE_NAME }}:${tag}
+          done
+
+      - name: Docker login
+        if: |
+          vars.DOCKER_PUSH &&
+          ( github.ref == 'refs/heads/main' || github.event_name == 'schedule' )
+        run: |
+          echo Docker login
+          echo "${{ secrets.DOCKER_PASS }}" | \
+            buildah login \
+              -u "${{ secrets.DOCKER_USER }}" \
+              --password-stdin ${{ secrets.DOCKER_REGISTRY }}
+
+      - name: Docker push
+        if: |
+          vars.DOCKER_PUSH &&
+          ( github.ref == 'refs/heads/main' || github.event_name == 'schedule' )
+        run: |
+          echo Docker push
+          for tag in ${{ matrix.container.tags }}; do
+            buildah manifest push --all \
+              --compression-format zstd --compression-level 9 \
+              localhost/image \
+              docker://${{ secrets.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${tag}
+            echo Pushed to ${{ secrets.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${tag}
           done

@@ -1,6 +1,7 @@
 ARG DEBIAN_RELEASE="bookworm"
+ARG REPOSITORY="vel.heimsbakk.no/containers/debian-base"
 
-FROM vel.heimsbakk.no/containers/debian-base:${DEBIAN_RELEASE}
+FROM ${REPOSITORY}:${DEBIAN_RELEASE}
 
 RUN apt-get update; \
     apt-get -y install \
