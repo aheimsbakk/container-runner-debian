@@ -13,6 +13,8 @@ on:
 jobs:
   build-container:
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
     strategy:
       matrix:
         container:
