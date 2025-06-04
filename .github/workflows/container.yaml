@@ -52,7 +52,7 @@ jobs:
 
       - name: Buildah build for all platforms
         run: |
-          buildah build ${{ matrix.container.extra_args }} \
+          buildah unshare buildah build ${{ matrix.container.extra_args }} \
             --platform ${{ matrix.container.platform }} \
             --manifest image \
             -f ${{ matrix.container.containerfile }}
