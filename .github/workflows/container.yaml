@@ -20,10 +20,10 @@ jobs:
             tags: latest bookworm ${{ github.sha }}
             platform: linux/amd64
             containerfile: Containerfile
-          - extra_args: --build-arg=DEBIAN_RELEASE="trixie"
-            tags: bookworm latest
-            platform: linux/amd64
-            containerfile: Containerfile
+          # - extra_args: --build-arg=DEBIAN_RELEASE="trixie"
+          #   tags: bookworm latest
+          #   platform: linux/amd64
+          #   containerfile: Containerfile
 
     env:
       STORAGE_DRIVER: vfs
@@ -39,7 +39,7 @@ jobs:
 
       - name: Get repository name
         run: | 
-          IMAGE_NAME=ghcr.io
+          IMAGE_NAME=${{ github.repository }}
           REPO_OWNER=${{ github.repository_owner }}
           IMAGE_NAME=$(echo ${IMAGE_NAME} | sed "s#${REPO_OWNER}/##g")
           IMAGE_NAME=$(echo ${IMAGE_NAME} | sed "s#container-##g")
