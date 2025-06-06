@@ -57,15 +57,18 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          push: true
+          push: ${{ github.ref == 'refs/heads/main' || github.event_name == 'schedule' }}
           provenance: false
           platforms: ${{ matrix.container.platforms }}
           tags: ${{ matrix.container.tags }}
           file: ${{ matrix.container.containerfile }}
           build-args: ${{ matrix.container.build-args }}
 
-      # - uses: actions/delete-package-versions@v5
-      #   with:
-      #     package-type: container
-      #     package-name: runner-debian
-      #     delete-only-untagged-versions: true
+      - name: Clean up old versions
+        if: github.ref == 'refs/heads/main' || github.event_name == 'schedule' 
+        uses: actions/delete-package-versions@v5
+        with:
+          package-type: container
+          package-name: runner-debian
+          min-versions-to-keep: 6
+          delete-only-untagged-versions: true
