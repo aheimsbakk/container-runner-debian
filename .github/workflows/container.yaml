@@ -10,6 +10,9 @@ on:
   schedule:
   - cron: '0 23 * * 2'
 
+env:
+  DOCKER_NAME: ghcr.io/${{ github.repository_owner }}/runner-debian
+
 jobs:
   build-container:
     runs-on: ubuntu-latest
@@ -21,14 +24,14 @@ jobs:
           - build-args: |
               DEBIAN_RELEASE=bookworm
             tags: |
-              ${{ github.repository }}:latest
-              ${{ github.repository }}:bookworm
+              ${{ env.DOCKER_NAME }}:latest
+              ${{ env.DOCKER_NAME }}:bookworm
             platforms: linux/amd64
             containerfile: Containerfile
           - build-args: |
               DEBIAN_RELEASE=trixie
             tags: |
-              ${{ github.repository }}:trixie
+              ${{ env.DOCKER_NAME }}:trixie
             platforms: linux/amd64
             containerfile: Containerfile
 
