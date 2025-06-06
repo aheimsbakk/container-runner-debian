@@ -66,4 +66,5 @@ jobs:
       - uses: actions/delete-package-versions@v5
         with:
           package-type: container
+          package-name: runner-debian
           delete-only-untagged-versions: true
