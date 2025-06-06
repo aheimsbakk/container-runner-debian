@@ -58,6 +58,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
+          provenance: false
           platforms: ${{ matrix.container.platforms }}
           tags: ${{ matrix.container.tags }}
           file: ${{ matrix.container.containerfile }}
