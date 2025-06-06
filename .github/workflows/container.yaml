@@ -3,7 +3,7 @@ on:
   push:
     paths:
       - '.github/**/*.yaml'
-      - '.gitihub/**/*.yml'
+      - '.github/**/*.yml'
       - 'Containerfile'
       - 'Dockerfile'
   workflow_dispatch:
