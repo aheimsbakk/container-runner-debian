@@ -64,8 +64,8 @@ jobs:
           file: ${{ matrix.container.containerfile }}
           build-args: ${{ matrix.container.build-args }}
 
-      - uses: actions/delete-package-versions@v5
-        with:
-          package-type: container
-          package-name: runner-debian
-          delete-only-untagged-versions: true
+      # - uses: actions/delete-package-versions@v5
+      #   with:
+      #     package-type: container
+      #     package-name: runner-debian
+      #     delete-only-untagged-versions: true
