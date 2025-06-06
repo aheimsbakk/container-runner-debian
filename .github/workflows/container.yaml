@@ -18,14 +18,19 @@ jobs:
     strategy:
       matrix:
         container:
-          - extra_args: --build-arg=DEBIAN_RELEASE="bookworm"
-            tags: latest bookworm ${{ github.sha }}
-            platform: linux/amd64
+          - build-args: |
+              DEBIAN_RELEASE=bookworm
+            tags: |
+              ghcr.io/${{ github.repository_owner }}/runner-debian:latest
+              ghcr.io/${{ github.repository_owner }}/runner-debian:bookworm
+            platforms: linux/amd64,linux/arm64
             containerfile: Containerfile
-          # - extra_args: --build-arg=DEBIAN_RELEASE="trixie"
-          #   tags: bookworm latest
-          #   platform: linux/amd64
-          #   containerfile: Containerfile
+          - build-args: |
+              DEBIAN_RELEASE=trixie
+            tags: |
+              ghcr.io/${{ github.repository_owner }}/runner-debian:trixie
+            platforms: linux/amd64,linux/arm64
+            containerfile: Containerfile
 
     env:
       STORAGE_DRIVER: vfs
@@ -33,20 +38,6 @@ jobs:
       BUILDAH_ISOLATION: chroot
 
     steps:
-      - name: Get container registry path
-        run: |
-          REGISTRY_PATH="ghcr.io"
-          REGISTRY_PATH=$(echo ${REGISTRY_PATH} | sed "s#https://##g")/${{ github.repository_owner }}
-          echo REGISTRY_PATH=${REGISTRY_PATH} >> $GITHUB_ENV
-
-      - name: Get repository name
-        run: | 
-          IMAGE_NAME=${{ github.repository }}
-          REPO_OWNER=${{ github.repository_owner }}
-          IMAGE_NAME=$(echo ${IMAGE_NAME} | sed "s#${REPO_OWNER}/##g")
-          IMAGE_NAME=$(echo ${IMAGE_NAME} | sed "s#container-##g")
-          echo IMAGE_NAME=${IMAGE_NAME} >> $GITHUB_ENV
-
       - name: Check out repository
         uses: actions/checkout@v4
 
@@ -56,16 +47,28 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      -
-        name: Set up QEMU
+
+      - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
-      -
-        name: Set up Docker Buildx
+
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      -
-        name: Build and push
+
+      - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          push: true
-          tags: ${{ env.REGISTRY_PATH }}/${{ env.IMAGE_NAME }}
-          file: Containerfile
+          push: ${{ github.ref == 'refs/heads/main' || github.event_name == 'schedule' }}
+          provenance: false
+          platforms: ${{ matrix.container.platforms }}
+          tags: ${{ matrix.container.tags }}
+          file: ${{ matrix.container.containerfile }}
+          build-args: ${{ matrix.container.build-args }}
+
+      - name: Clean up old versions
+        if: github.ref == 'refs/heads/main' || github.event_name == 'schedule' 
+        uses: actions/delete-package-versions@v5
+        with:
+          package-type: container
+          package-name: runner-debian
+          min-versions-to-keep: 6
+          delete-only-untagged-versions: true
