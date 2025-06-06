@@ -19,14 +19,14 @@ jobs:
       matrix:
         container:
           - build-args: |
-              DEBIAN_RELEASE="bookworm"
+              DEBIAN_RELEASE=bookworm
             tags: |
               ${{ github.repository }}:latest
               ${{ github.repository }}:bookworm
             platforms: linux/amd64
             containerfile: Containerfile
           - build-args: |
-              DEBIAN_RELEASE="trixie"
+              DEBIAN_RELEASE=trixie
             tags: |
               ${{ github.repository }}:trixie
             platforms: linux/amd64
