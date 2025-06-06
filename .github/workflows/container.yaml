@@ -18,14 +18,19 @@ jobs:
     strategy:
       matrix:
         container:
-          - extra_args: --build-arg=DEBIAN_RELEASE="bookworm"
-            tags: latest bookworm ${{ github.sha }}
-            platform: linux/amd64
+          - build-args: |
+              DEBIAN_RELEASE="bookworm"
+            tags: |
+              ${{ github.repository }}:latest
+              ${{ github.repository }}:bookworm
+            platforms: linux/amd64
             containerfile: Containerfile
-          # - extra_args: --build-arg=DEBIAN_RELEASE="trixie"
-          #   tags: bookworm latest
-          #   platform: linux/amd64
-          #   containerfile: Containerfile
+          - build-args: |
+              DEBIAN_RELEASE="trixie"
+            tags: |
+              ${{ github.repository }}:trixie
+            platforms: linux/amd64
+            containerfile: Containerfile
 
     env:
       STORAGE_DRIVER: vfs
@@ -67,5 +72,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: ${{ env.REGISTRY_PATH }}/${{ env.IMAGE_NAME }}
-          file: Containerfile
+          platforms: ${{ matrix.container.platforms }}
+          tags: ${{ matrix.container.tags }}
+          file: ${{ matrix.container.containerfile }}
+          build-args: ${{ matrix.container.build-args }}
