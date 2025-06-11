@@ -5,10 +5,9 @@ FROM ${BASE}:${RELEASE}
 
 RUN apt-get update; \
     apt-get -y install \
-      buildah \
       node-typescript \
-      podman \
       qemu-user-static \
+      docker.io \
       sudo \
       ; \
     apt-get clean
