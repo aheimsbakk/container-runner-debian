@@ -14,18 +14,22 @@ jobs:
   build-container:
     runs-on: shell
 
-    # strategy:
-    #   matrix:
-    #     container:
-    #       - extra_args: --build-arg=DEBIAN_RELEASE="bookworm"
-    #         tags: latest bookworm ${{ github.sha }}
-    #         platform: linux/amd64
-    #         containerfile: Containerfile
-    #       - extra_args: --build-arg=DEBIAN_RELEASE="trixie"
-    #         tags: bookworm latest
-    #         platform: linux/amd64
-    #         containerfile: Containerfile
-
+    strategy:
+      matrix:
+        container:
+          - build-args: |
+              RELEASE=bookworm
+            tags: |
+              ${{ secrets.REGISTRY_NAME }}/${{ github.repository_owner }}/runner-debian:latest
+              ${{ secrets.REGISTRY_NAME }}/${{ github.repository_owner }}/runner-debian:bookworm
+            platforms: linux/amd64,linux/arm64
+            containerfile: Containerfile
+          - build-args: |
+              RELEASE=trixie
+            tags: |
+              ${{ secrets.REGISTRY_NAME }}/${{ github.repository_owner }}/runner-debian:trixie
+            platforms: linux/amd64,linux/arm64
+            containerfile: Containerfile
 
     steps:
       - name: Get container registry path
@@ -63,6 +67,7 @@ jobs:
         with:
           push: ${{ github.ref == 'refs/heads/main' || github.event_name == 'schedule' }}
           provenance: false
-          platforms: linux/amd64
-          tags: vel.heimsbakk.no/containers/runner-debian:latest
-          file: Containerfile
+          platforms: ${{ matrix.container.platforms }}
+          tags: ${{ matrix.container.tags }}
+          file: ${{ matrix.container.containerfile }}
+          build-args: ${{ matrix.container.build-args }}

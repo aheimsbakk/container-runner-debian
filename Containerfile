@@ -1,7 +1,7 @@
-ARG DEBIAN_RELEASE="bookworm"
-ARG REPOSITORY="docker.io/debian"
+ARG RELEASE="bookworm"
+ARG BASE="vel.heimsbakk.no/containers/debian-base"
 
-FROM ${REPOSITORY}:${DEBIAN_RELEASE}
+FROM ${BASE}:${RELEASE}
 
 RUN apt-get update; \
     apt-get -y install \
