@@ -1,5 +1,5 @@
 ARG DEBIAN_RELEASE="bookworm"
-ARG REPOSITORY="vel.heimsbakk.no/containers/debian-base"
+ARG REPOSITORY="docker.io/debian"
 
 FROM ${REPOSITORY}:${DEBIAN_RELEASE}
 

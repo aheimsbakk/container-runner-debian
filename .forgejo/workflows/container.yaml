@@ -12,25 +12,20 @@ on:
 
 jobs:
   build-container:
-    runs-on: docker
-    container:
-      image: vel.heimsbakk.no/containers/runner-debian:latest
-    strategy:
-      matrix:
-        container:
-          - extra_args: --build-arg=DEBIAN_RELEASE="bookworm"
-            tags: latest bookworm ${{ github.sha }}
-            platform: linux/amd64
-            containerfile: Containerfile
-          - extra_args: --build-arg=DEBIAN_RELEASE="trixie"
-            tags: bookworm latest
-            platform: linux/amd64
-            containerfile: Containerfile
+    runs-on: shell
 
-    env:
-      STORAGE_DRIVER: vfs
-      BUILDAH_FORMAT: docker
-      BUILDAH_ISOLATION: chroot
+    # strategy:
+    #   matrix:
+    #     container:
+    #       - extra_args: --build-arg=DEBIAN_RELEASE="bookworm"
+    #         tags: latest bookworm ${{ github.sha }}
+    #         platform: linux/amd64
+    #         containerfile: Containerfile
+    #       - extra_args: --build-arg=DEBIAN_RELEASE="trixie"
+    #         tags: bookworm latest
+    #         platform: linux/amd64
+    #         containerfile: Containerfile
+
 
     steps:
       - name: Get container registry path
@@ -50,53 +45,24 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Buildah build for all platforms
-        run: |
-          buildah build ${{ matrix.container.extra_args }} \
-            --platform ${{ matrix.container.platform }} \
-            --manifest image \
-            -f ${{ matrix.container.containerfile }}
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: vel.heimsbakk.no
+          username: ${{ secrets.REGISTRY_USER }}
+          password: ${{ secrets.REGISTRY_PASS }}
 
-      - name: Registry login
-        if: github.ref == 'refs/heads/main' || github.event_name == 'schedule'
-        run: |
-          echo "${{ secrets.REGISTRY_PASS }}" | \
-            buildah login \
-              -u "${{ secrets.REGISTRY_USER }}" \
-              --password-stdin ${{ env.REGISTRY_PATH }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
-      - name: Registry push
-        if: github.ref == 'refs/heads/main' || github.event_name == 'schedule'
-        run: |
-          for tag in ${{ matrix.container.tags }}; do
-            buildah manifest push --all \
-              --compression-format zstd --compression-level 9 \
-              localhost/image \
-              docker://${{ env.REGISTRY_PATH }}/${{ env.IMAGE_NAME }}:${tag}
-            echo Pushed to ${{ env.REGISTRY_PATH }}/${{ env.IMAGE_NAME }}:${tag}
-          done
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Docker login
-        if: |
-          vars.DOCKER_PUSH &&
-          ( github.ref == 'refs/heads/main' || github.event_name == 'schedule' )
-        run: |
-          echo Docker login
-          echo "${{ secrets.DOCKER_PASS }}" | \
-            buildah login \
-              -u "${{ secrets.DOCKER_USER }}" \
-              --password-stdin ${{ secrets.DOCKER_REGISTRY }}
-
-      - name: Docker push
-        if: |
-          vars.DOCKER_PUSH &&
-          ( github.ref == 'refs/heads/main' || github.event_name == 'schedule' )
-        run: |
-          echo Docker push
-          for tag in ${{ matrix.container.tags }}; do
-            buildah manifest push --all \
-              --compression-format zstd --compression-level 9 \
-              localhost/image \
-              docker://${{ secrets.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${tag}
-            echo Pushed to ${{ secrets.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${tag}
-          done
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          push: ${{ github.ref == 'refs/heads/main' || github.event_name == 'schedule' }}
+          provenance: false
+          platforms: linux/amd64
+          tags: vel.heimsbakk.no/containers/runner-debian:latest
+          file: Containerfile
