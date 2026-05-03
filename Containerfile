@@ -1,5 +1,5 @@
 ARG RELEASE="bookworm"
-ARG BASE="vel.heimsbakk.no/containers/debian-base"
+ARG BASE="debian"
 
 FROM ${BASE}:${RELEASE}
 
